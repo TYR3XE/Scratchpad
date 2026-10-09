@@ -35,6 +35,17 @@ Alle Dateien haben 30 fps, 105 Frames und 3,5 s. Erster und letzter Frame sind k
 Im 9:16-Format sitzt der Block oberhalb der unteren UI-Zone von Reels und TikTok.
 Da der Hintergrund transparent ist, lässt er sich im Schnitt frei verschieben und skalieren.
 
+## In Final Cut Pro verwenden
+
+1. `…_ALPHA_ProRes4444.mov` importieren.
+2. Den Clip **über** das Video ziehen, sodass er als verbundener Clip oberhalb der Hauptgeschichte liegt.
+   Liegt er *in* der Hauptgeschichte, ist darunter nichts, und die transparenten Bereiche erscheinen schwarz.
+3. Falls der Hintergrund trotzdem schwarz ist: Clip in der Übersicht auswählen, dann im Informationen-Inspektor (⌘4) unten links die Ansicht „Einstellungen“ wählen.
+   Dort die Alpha-Einstellung (engl. *Alpha Handling*) auf **Straight** stellen.
+
+Ältere Exporte dieses Projekts wurden mit FFmpeg 6.1 erstellt. Deren Alphakanal zeigt Final Cut auf Apple-Silicon-Macs deckend an (bekanntes Problem, siehe [FCPCafe #359](https://github.com/CommandPost/FCPCafe/issues/359)).
+Die aktuellen Dateien sind mit FFmpeg 7.0.2 erzeugt. Alte Clips bitte aus der Mediathek löschen und neu importieren.
+
 ## Ablauf
 
 | Zeit | Was passiert |
@@ -61,5 +72,7 @@ node render.mjs --formats 9x16 --fps 25          # nur 9:16, 25 fps
 node render.mjs --prores-all                     # ProRes auch für die Text-scharf-Variante
 ```
 
-Voraussetzungen: Node 18+, ffmpeg (mit `prores_ks` und `libvpx-vp9`).
+Voraussetzungen: Node 18+, **FFmpeg ≥ 7.0.1** (mit `prores_ks`, `libvpx-vp9`, `libx264`).
+Eine andere FFmpeg-Version gibst du mit `FFMPEG_BIN=/pfad/zu/ffmpeg node render.mjs` an. Bei einer zu alten Version warnt das Skript.
+Alle Videos werden nach BT.709 umgerechnet und entsprechend gekennzeichnet. Dadurch stimmen die GITIS-Farben auch in Apple-Programmen ohne Grünstich.
 Gerendert wird Frame für Frame mit Playwright/Chromium. Jedes Bild ist dadurch deterministisch, ohne Ruckler oder ausgelassene Frames.
