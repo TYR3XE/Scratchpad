@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 Schritte – Motion Graphic</title>
+<style>
+  /* =====================================================================
+     BRAND – hier die GITIS-Werte eintragen (Farben, Schrift, Glas-Optik).
+     Alles andere passt sich automatisch an.
+     ===================================================================== */
+  :root {
+    --accent: #2D6BFF;          /* Hauptfarbe (Badges, Linie)            */
+    --accent-2: #18C2FF;        /* Verlaufsfarbe zur Hauptfarbe          */
+    --accent-glow: rgba(45, 107, 255, 0.55);
+    --accent-halo: rgba(45, 107, 255, 0.20);
+    --number: #FFFFFF;          /* Ziffer im Badge                        */
+    --text: #FFFFFF;            /* Schritt-Text (wird geblurrt)           */
+    --font: "Inter", "Inter Display", "Helvetica Neue", Arial, sans-serif;
+    --glass: rgba(9, 13, 22, 0.56);
+    --glass-hi: rgba(255, 255, 255, 0.13);
+    --glass-border: rgba(255, 255, 255, 0.17);
+    --card-radius: 28px;
+  }
+
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: transparent; }
+  body { overflow: hidden; font-family: var(--font); -webkit-font-smoothing: antialiased; }
+
+  /* Vorschau-Hintergründe (nur im Browser, nie im Export) */
+  body.bg-checker {
+    background-color: #2a2a2a;
+    background-image:
+      linear-gradient(45deg, #3a3a3a 25%, transparent 25%, transparent 75%, #3a3a3a 75%),
+      linear-gradient(45deg, #3a3a3a 25%, transparent 25%, transparent 75%, #3a3a3a 75%);
+    background-size: 48px 48px;
+    background-position: 0 0, 24px 24px;
+  }
+  body.bg-demo {
+    background: #12161c radial-gradient(120% 80% at 30% 20%, #5b6b7d 0%, #2c3540 45%, #12161c 100%);
+  }
+  body.bg-black { background: #000; }
+
+  #stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #rig { position: absolute; left: 0; top: 0; width: 100%; height: 100%; will-change: transform; }
+
+  .track {
+    position: absolute;
+    border-radius: 99px;
+    background: linear-gradient(var(--track-dir, 180deg), var(--accent-2), var(--accent));
+    box-shadow: 0 0 18px var(--accent-glow);
+  }
+  .pulse {
+    position: absolute;
+    width: 22px; height: 22px; margin: -11px 0 0 -11px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, #fff 28%, rgba(255,255,255,0) 72%);
+    box-shadow: 0 0 22px 8px var(--accent-glow), 0 0 6px 2px rgba(255,255,255,0.9);
+    opacity: 0;
+  }
+
+  .badge {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(145deg, var(--accent-2) 0%, var(--accent) 62%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.35),
+      inset 0 -6px 14px rgba(0,0,0,0.18),
+      0 0 0 var(--halo, 8px) var(--accent-halo),
+      0 12px 34px var(--accent-glow);
+  }
+  .badge .num {
+    color: var(--number);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    display: block;
+  }
+  .ring {
+    position: absolute; inset: -3px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-2);
+    opacity: 0;
+  }
+
+  .card {
+    position: absolute;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    background:
+      linear-gradient(135deg, var(--glass-hi) 0%, rgba(255,255,255,0.02) 55%, rgba(255,255,255,0.06) 100%),
+      var(--glass);
+    box-shadow:
+      inset 0 0 0 1.5px var(--glass-border),
+      inset 0 1.5px 0 rgba(255,255,255,0.22),
+      0 22px 60px rgba(0, 0, 0, 0.38);
+  }
+  .card .label {
+    position: absolute;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    white-space: nowrap;
+    will-change: filter, transform;
+  }
+  .layout-horizontal .card .label { white-space: normal; text-align: center; line-height: 1.16; }
+  .sheen {
+    position: absolute; top: -20%; height: 140%;
+    width: 38%;
+    background: linear-gradient(90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.16) 45%,
+      rgba(255,255,255,0.26) 50%,
+      rgba(255,255,255,0.16) 55%,
+      rgba(255,255,255,0) 100%);
+    transform: skewX(-20deg);
+    opacity: 0;
+  }
+
+  /* Vorschau-Steuerung */
+  #ui {
+    position: fixed; left: 16px; bottom: 16px; z-index: 10;
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    font: 13px/1.2 system-ui, sans-serif; color: #fff;
+  }
+  #ui select, #ui button {
+    font: inherit; color: #fff; background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; padding: 6px 10px;
+  }
+  body.render #ui { display: none; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="rig"></div></div>
+<div id="ui">
+  <select id="ui-format">
+    <option value="9x16">9:16</option><option value="4x5">4:5</option>
+    <option value="1x1">1:1</option><option value="16x9">16:9</option>
+  </select>
+  <select id="ui-bg">
+    <option value="demo">Demo-Hintergrund</option>
+    <option value="checker">Transparenz-Raster</option>
+    <option value="black">Schwarz</option>
+  </select>
+  <select id="ui-variant">
+    <option value="blurred">Text geblurrt</option>
+    <option value="sharp">Text wird scharf</option>
+  </select>
+  <button id="ui-replay">Neu abspielen</button>
+</div>
+
+<script>
+/* =======================================================================
+   INHALT & TIMING
+   ======================================================================= */
+const CONFIG = {
+  steps: [
+    "Workshop buchen",
+    "Entscheidung zur Zusammenarbeit",
+    "Wir starten mit der Umsetzung",
+  ],
+  textBlur: 12,     // px – Endzustand des Text-Blurs (bezogen auf 44 px Schriftgröße)
+  duration: 3.5,    // Sekunden, inkl. Ein- und Ausblendung
+};
+
+// Ankerpunkte: wo der Block vertikal sitzt (Anteil der Bildhöhe, Mitte des Blocks).
+// 9:16 liegt bewusst über der unteren Reels/TikTok-UI-Zone.
+const FORMATS = {
+  "9x16": { w: 1080, h: 1920, layout: "vertical",   anchorY: 0.635 },
+  "4x5":  { w: 1080, h: 1350, layout: "vertical",   anchorY: 0.60  },
+  "1x1":  { w: 1080, h: 1080, layout: "vertical",   anchorY: 0.55  },
+  "16x9": { w: 1920, h: 1080, layout: "horizontal", anchorY: 0.775 },
+};
+
+/* =======================================================================
+   EASING
+   ======================================================================= */
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const prog = (t, start, dur) => clamp01((t - start) / dur);
+const lerp = (a, b, p) => a + (b - a) * p;
+const easeOutCubic = p => 1 - Math.pow(1 - p, 3);
+const easeInCubic = p => p * p * p;
+const easeInOutCubic = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const easeInOutSine = p => -(Math.cos(Math.PI * p) - 1) / 2;
+const easeOutExpo = p => p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+const easeOutBack = (p, s = 1.9) => 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2);
+
+/* =======================================================================
+   SETUP
+   ======================================================================= */
+const params = new URLSearchParams(location.search);
+const formatKey = FORMATS[params.get("format")] ? params.get("format") : "9x16";
+const FMT = FORMATS[formatKey];
+const VARIANT = params.get("variant") === "sharp" ? "sharp" : "blurred";
+const RENDER = params.has("render");
+if (params.has("blur")) CONFIG.textBlur = parseFloat(params.get("blur"));
+
+document.body.classList.add(RENDER ? "render" : "bg-" + (params.get("bg") || "demo"));
+const stage = document.getElementById("stage");
+const rig = document.getElementById("rig");
+stage.style.width = FMT.w + "px";
+stage.style.height = FMT.h + "px";
+stage.classList.add("layout-" + FMT.layout);
+
+const el = (cls, parent) => { const d = document.createElement("div"); d.className = cls; parent.appendChild(d); return d; };
+
+const track = el("track", rig);
+const pulse = el("pulse", rig);
+const steps = CONFIG.steps.map((text, i) => {
+  const card = el("card", rig);
+  const label = el("label", card); label.textContent = text;
+  const sheen = el("sheen", card);
+  const badge = el("badge", rig);
+  const ring = el("ring", badge);
+  const num = document.createElement("span"); num.className = "num"; num.textContent = String(i + 1);
+  badge.appendChild(num);
+  return { card, label, sheen, badge, ring, num };
+});
+
+/* -----------------------------------------------------------------------
+   LAYOUT (absolute Geometrie, damit Linie & Badges pixelgenau sitzen)
+   ----------------------------------------------------------------------- */
+let G; // Geometrie
+function layout() {
+  if (FMT.layout === "vertical") {
+    const D = 100, cardH = 124, cardW = 760, gapX = 26, pitch = 168, fs = 44, padX = 44;
+    const totalW = D + gapX + cardW;
+    const totalH = cardH * 3 + (pitch - cardH) * 2;
+    const left = Math.round((FMT.w - totalW) / 2);
+    const top = Math.round(FMT.h * FMT.anchorY - totalH / 2);
+    G = { D, cardH, cardW, fs, padX, left, top, pitch, cardX: left + D + gapX };
+    steps.forEach((s, i) => {
+      const cy = top + cardH / 2 + i * pitch;
+      s.cx = left + D / 2; s.cy = cy;
+      Object.assign(s.badge.style, { width: D + "px", height: D + "px", left: left + "px", top: (cy - D / 2) + "px" });
+      s.num.style.fontSize = Math.round(D * 0.44) + "px";
+      Object.assign(s.card.style, { left: G.cardX + "px", top: (cy - cardH / 2) + "px", height: cardH + "px", width: cardW + "px" });
+      Object.assign(s.label.style, { left: padX + "px", top: "50%", fontSize: fs + "px" });
+      fitLabel(s, cardW - padX * 2, fs);
+    });
+    const lw = 6;
+    G.track = { x: left + D / 2 - lw / 2, y0: steps[0].cy, y1: steps[2].cy, lw };
+    Object.assign(track.style, { left: G.track.x + "px", top: G.track.y0 + "px", width: lw + "px" });
+    track.style.setProperty("--track-dir", "180deg");
+  } else {
+    const D = 92, cardH = 136, cardW = 440, pitch = 500, gapY = 30, fs = 36, padX = 30;
+    const totalH = D + gapY + cardH;
+    const x0 = Math.round(FMT.w / 2 - pitch);
+    const top = Math.round(FMT.h * FMT.anchorY - totalH / 2);
+    G = { D, cardH, cardW, fs, padX, top, pitch };
+    steps.forEach((s, i) => {
+      const cx = x0 + i * pitch, cy = top + D / 2;
+      s.cx = cx; s.cy = cy;
+      Object.assign(s.badge.style, { width: D + "px", height: D + "px", left: (cx - D / 2) + "px", top: top + "px" });
+      s.num.style.fontSize = Math.round(D * 0.44) + "px";
+      Object.assign(s.card.style, { left: (cx - cardW / 2) + "px", top: (top + D + gapY) + "px", height: cardH + "px", width: cardW + "px" });
+      Object.assign(s.label.style, { left: "50%", top: "50%", width: (cardW - padX * 2) + "px", fontSize: fs + "px" });
+    });
+    const lw = 6;
+    G.track = { y: top + D / 2 - lw / 2, x0: steps[0].cx, x1: steps[2].cx, lw };
+    Object.assign(track.style, { left: G.track.x0 + "px", top: G.track.y + "px", height: lw + "px" });
+    track.style.setProperty("--track-dir", "90deg");
+  }
+}
+// Schriftgröße automatisch verkleinern, falls ein Schritt-Text zu lang ist
+function fitLabel(s, maxW, fs) {
+  let size = fs;
+  s.label.style.fontSize = size + "px";
+  while (s.label.scrollWidth > maxW && size > 20) { size -= 1; s.label.style.fontSize = size + "px"; }
+}
+
+/* =======================================================================
+   TIMELINE – render(t) ist deterministisch: gleicher Zeitpunkt = gleiches Bild
+   ======================================================================= */
+const T = {
+  stepStart: i => 0.10 + i * 0.38,   // Badge-Pop je Schritt
+  pulse: [1.62, 2.32],               // Licht wandert durch die Linie
+  sheen: i => 1.58 + i * 0.35,       // Glanz über die Karte, synchron zum Licht
+  outro: i => 2.88 + i * 0.07,       // Ausblendung je Schritt
+  outroDur: 0.42,
+};
+// Blur skaliert mit der Schriftgröße, damit der Text in jedem Format gleich "weich" wirkt
+const blurScale = () => G.fs / 44;
+
+function render(t) {
+  const vertical = FMT.layout === "vertical";
+  // ganz leichte Drift für Lebendigkeit
+  const drift = lerp(8, -8, easeInOutSine(clamp01(t / CONFIG.duration)));
+  rig.style.transform = vertical ? `translate3d(0, ${drift}px, 0)` : `translate3d(${-drift}px, 0, 0)`;
+
+  // --- Linie: zwei Segmente, die jeweils genau beim nächsten Badge ankommen
+  let fill = 0;
+  for (let k = 0; k < 2; k++) {
+    const arrive = T.stepStart(k + 1) + 0.05;
+    fill += easeInOutCubic(prog(t, arrive - 0.36, 0.36)) / 2;
+  }
+  const trackOut = easeInCubic(prog(t, T.outro(0), 0.5));
+  if (vertical) {
+    const len = (G.track.y1 - G.track.y0) * fill;
+    track.style.height = len + "px";
+  } else {
+    const len = (G.track.x1 - G.track.x0) * fill;
+    track.style.width = len + "px";
+  }
+  track.style.opacity = fill > 0 ? 1 - trackOut : 0;
+
+  // --- Lichtpuls entlang der Linie (Halte-Phase)
+  const pp = prog(t, T.pulse[0], T.pulse[1] - T.pulse[0]);
+  const pPos = easeInOutSine(pp);
+  if (vertical) {
+    pulse.style.left = (G.track.x + G.track.lw / 2) + "px";
+    pulse.style.top = lerp(G.track.y0, G.track.y1, pPos) + "px";
+  } else {
+    pulse.style.left = lerp(G.track.x0, G.track.x1, pPos) + "px";
+    pulse.style.top = (G.track.y + G.track.lw / 2) + "px";
+  }
+  pulse.style.opacity = pp > 0 && pp < 1 ? Math.sin(Math.PI * pp) : 0;
+
+  steps.forEach((s, i) => {
+    const st = T.stepStart(i);
+    const out = easeInCubic(prog(t, T.outro(i), T.outroDur));
+    const outY = -26 * out, outBlur = 16 * out * blurScale(), outOp = 1 - out;
+
+    // Glow, wenn der Lichtpuls das Badge passiert
+    const glow = pp > 0 && pp < 1 ? Math.exp(-Math.pow((pPos - i / 2) / 0.09, 2)) : 0;
+
+    // Badge-Pop mit leichtem Overshoot
+    const bp = prog(t, st, 0.5);
+    const bScale = (bp === 0 ? 0 : lerp(0.25, 1, easeOutBack(bp))) * (1 + 0.07 * glow) * (1 - 0.15 * out);
+    const bOp = easeOutCubic(prog(t, st, 0.18)) * outOp;
+    s.badge.style.transform = `translateY(${outY}px) scale(${bScale})`;
+    s.badge.style.opacity = bOp;
+    s.badge.style.filter = outBlur > 0.05 ? `blur(${outBlur * 0.6}px)` : "none";
+    s.badge.style.setProperty("--halo", (8 + 10 * glow) + "px");
+
+    // Ziffer gleitet ins Badge
+    const np = easeOutCubic(prog(t, st + 0.12, 0.38));
+    s.num.style.transform = `translateY(${(1 - np) * G.D * 0.32}px)`;
+    s.num.style.opacity = np;
+
+    // Ring-"Ping"
+    const rp = prog(t, st + 0.1, 0.7);
+    s.ring.style.transform = `scale(${1 + 0.85 * easeOutCubic(rp)})`;
+    s.ring.style.opacity = rp > 0 && rp < 1 ? 0.75 * (1 - easeOutCubic(rp)) : 0;
+
+    // Karte wächst aus dem Badge heraus
+    const cp = easeOutExpo(prog(t, st + 0.1, 0.7));
+    const cOp = easeOutCubic(prog(t, st + 0.08, 0.22)) * outOp;
+    if (vertical) {
+      s.card.style.width = lerp(G.cardH, G.cardW, cp) + "px";
+      s.card.style.transform = `translate(${(1 - cp) * -18}px, ${outY}px)`;
+    } else {
+      const w = lerp(G.cardW * 0.35, G.cardW, cp);
+      s.card.style.width = w + "px";
+      s.card.style.left = (s.cx - w / 2) + "px";
+      s.card.style.transform = `translateY(${(1 - cp) * 26 + outY}px)`;
+    }
+    s.card.style.opacity = cOp;
+    s.card.style.filter = outBlur > 0.05 ? `blur(${outBlur * 0.5}px)` : "none";
+
+    // Text: blendet unscharf ein und bleibt geblurrt (oder wird scharf in Variante "sharp")
+    const tp = easeOutCubic(prog(t, st + 0.22, 0.6));
+    const target = VARIANT === "sharp" ? 0 : CONFIG.textBlur * blurScale();
+    const blur = target + 18 * blurScale() * (1 - tp);
+    s.label.style.opacity = tp;
+    s.label.style.filter = blur > 0.05 ? `blur(${blur}px)` : "none";
+    if (vertical) {
+      s.label.style.transform = `translate(${(1 - tp) * 40}px, -50%)`;
+    } else {
+      // Label ist an der Karte zentriert; die Karte wächst – Label bleibt ruhig
+      s.label.style.transform = `translate(-50%, calc(-50% + ${(1 - tp) * 18}px))`;
+    }
+
+    // Glanz über die Karte
+    const sp = easeInOutCubic(prog(t, T.sheen(i), 0.55));
+    const cardW = parseFloat(s.card.style.width);
+    s.sheen.style.left = lerp(-0.5 * cardW, 1.15 * cardW, sp) + "px";
+    s.sheen.style.opacity = sp > 0 && sp < 1 ? 1 : 0;
+  });
+}
+
+/* =======================================================================
+   EXPORT-HOOKS & VORSCHAU
+   ======================================================================= */
+window.__CONFIG = CONFIG;
+window.__FMT = FMT;
+window.__render = render;
+window.__ready = (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { layout(); render(0); return true; });
+
+if (!RENDER) {
+  const scaleToFit = () => {
+    const s = Math.min(innerWidth / FMT.w, innerHeight / FMT.h);
+    stage.style.transform = `translate(${(innerWidth - FMT.w * s) / 2}px, ${(innerHeight - FMT.h * s) / 2}px) scale(${s})`;
+  };
+  addEventListener("resize", scaleToFit); scaleToFit();
+
+  const setParam = (k, v) => { params.set(k, v); location.search = params.toString(); };
+  const uiF = document.getElementById("ui-format"), uiB = document.getElementById("ui-bg"), uiV = document.getElementById("ui-variant");
+  uiF.value = formatKey; uiB.value = params.get("bg") || "demo"; uiV.value = VARIANT;
+  uiF.onchange = () => setParam("format", uiF.value);
+  uiB.onchange = () => setParam("bg", uiB.value);
+  uiV.onchange = () => setParam("variant", uiV.value);
+
+  let t0 = performance.now();
+  document.getElementById("ui-replay").onclick = () => { t0 = performance.now(); };
+  window.__ready.then(() => {
+    const loop = now => {
+      const t = ((now - t0) / 1000) % (CONFIG.duration + 0.8);
+      render(Math.min(t, CONFIG.duration));
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  });
+}
+</script>
+</body>
+</html>

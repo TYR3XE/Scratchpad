@@ -1,0 +1,12 @@
+{
+  "name": "motion-graphic-3-schritte",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "preview": "npx serve ."
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
