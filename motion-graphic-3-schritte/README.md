@@ -9,6 +9,16 @@ Drei nummerierte Schritte werden nacheinander aufgebaut. Die Schritt-Texte bleib
 
 ![Storyboard 9:16](export/storyboard_9x16.png)
 
+## Stil (GITIS, von www.gitis.de)
+
+| Element | Wert | Herkunft |
+|---|---|---|
+| Badges & Linie | Lime-Verlauf `#A7F08D` → `#C6EE74` | CTA-Button „Workshop anfragen“ |
+| Ziffern | Navy `#2B3A57` | Logo-Schriftzug, Button-Text |
+| Karten | Glas-Pills im Verlauf `#366A51` → `#2F4A5A` (80 % Deckkraft) | Hero-Hintergrund |
+| Form | Pill (voll abgerundet) | Navigation & Button |
+| Schrift | **Rubik** 600 (Text) / 700 (Ziffern) | lokal in `fonts/` eingebunden (SIL OFL 1.1) |
+
 ## Dateien (`export/<format>/`)
 
 | Datei | Wofür |
@@ -38,7 +48,7 @@ Da der Hintergrund transparent ist, lässt er sich im Schnitt frei verschieben u
 
 Alles liegt in `index.html`:
 
-- **Brand:** die CSS-Variablen ganz oben (`--accent`, `--accent-2`, `--font`, Glas-Farben, `--card-radius`)
+- **Brand:** die CSS-Variablen ganz oben (`--accent`, `--accent-2`, `--number`, `--glass-from/-to`, `--font`, `--card-radius`)
 - **Texte, Blur-Stärke, Dauer:** `CONFIG` im Script
 - **Position je Format:** `FORMATS[...].anchorY`
 
@@ -53,7 +63,3 @@ node render.mjs --prores-all                     # ProRes auch für die Text-sch
 
 Voraussetzungen: Node 18+, ffmpeg (mit `prores_ks` und `libvpx-vp9`).
 Gerendert wird Frame für Frame mit Playwright/Chromium. Jedes Bild ist dadurch deterministisch, ohne Ruckler oder ausgelassene Frames.
-
-> **Hinweis zum Stil:** www.gitis.de war aus der Render-Umgebung nicht erreichbar.
-> Farben und Schrift (Blau-Verlauf, Inter) sind deshalb **Platzhalter** im Stil einer modernen Software-Marke.
-> Mit den echten GITIS-Werten (Hex-Farben, Schrift) sind die Variablen in einer Minute getauscht und neu gerendert.

@@ -5,22 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>3 Schritte – Motion Graphic</title>
 <style>
+  /* Rubik (SIL OFL 1.1, siehe fonts/OFL-Rubik.txt) – lokal eingebunden, damit der Export offline identisch ist */
+  @font-face { font-family: "Rubik"; font-weight: 500; font-display: block; src: url("fonts/rubik-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Rubik"; font-weight: 600; font-display: block; src: url("fonts/rubik-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Rubik"; font-weight: 700; font-display: block; src: url("fonts/rubik-latin-700-normal.woff2") format("woff2"); }
+
   /* =====================================================================
-     BRAND – hier die GITIS-Werte eintragen (Farben, Schrift, Glas-Optik).
+     BRAND – GITIS (Farben aus www.gitis.de: CTA-Button, Logo, Hero-Verlauf)
      Alles andere passt sich automatisch an.
      ===================================================================== */
   :root {
-    --accent: #2D6BFF;          /* Hauptfarbe (Badges, Linie)            */
-    --accent-2: #18C2FF;        /* Verlaufsfarbe zur Hauptfarbe          */
-    --accent-glow: rgba(45, 107, 255, 0.55);
-    --accent-halo: rgba(45, 107, 255, 0.20);
-    --number: #FFFFFF;          /* Ziffer im Badge                        */
-    --text: #FFFFFF;            /* Schritt-Text (wird geblurrt)           */
-    --font: "Inter", "Inter Display", "Helvetica Neue", Arial, sans-serif;
-    --glass: rgba(9, 13, 22, 0.56);
-    --glass-hi: rgba(255, 255, 255, 0.13);
-    --glass-border: rgba(255, 255, 255, 0.17);
-    --card-radius: 28px;
+    --accent: #A7F08D;          /* GITIS Lime – CTA-Button oben            */
+    --accent-2: #C6EE74;        /* GITIS Lime-Gelb – CTA-Button unten      */
+    --accent-glow: rgba(180, 238, 128, 0.42);
+    --accent-halo: rgba(180, 238, 128, 0.20);
+    --number: #2B3A57;          /* GITIS Navy – Logo-Schrift/Button-Text   */
+    --text: #FFFFFF;            /* Schritt-Text (wird geblurrt)            */
+    --font: "Rubik", "Helvetica Neue", Arial, sans-serif;
+    --glass-from: rgba(54, 106, 81, 0.80);   /* Hero-Verlauf Grün  #366A51 */
+    --glass-to: rgba(47, 74, 90, 0.80);      /* Hero-Verlauf Navy  #2F4A5A */
+    --glass-hi: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --card-radius: 999px;       /* Pill-Form wie Navigation & Button        */
   }
 
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: transparent; }
@@ -46,7 +52,7 @@
   .track {
     position: absolute;
     border-radius: 99px;
-    background: linear-gradient(var(--track-dir, 180deg), var(--accent-2), var(--accent));
+    background: linear-gradient(var(--track-dir, 180deg), var(--accent), var(--accent-2));
     box-shadow: 0 0 18px var(--accent-glow);
   }
   .pulse {
@@ -61,11 +67,11 @@
   .badge {
     position: absolute;
     border-radius: 50%;
-    background: linear-gradient(145deg, var(--accent-2) 0%, var(--accent) 62%);
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
     display: flex; align-items: center; justify-content: center;
     box-shadow:
-      inset 0 2px 0 rgba(255,255,255,0.35),
-      inset 0 -6px 14px rgba(0,0,0,0.18),
+      inset 0 2px 0 rgba(255,255,255,0.55),
+      inset 0 -5px 12px rgba(43,58,87,0.14),
       0 0 0 var(--halo, 8px) var(--accent-halo),
       0 12px 34px var(--accent-glow);
   }
@@ -80,7 +86,7 @@
   .ring {
     position: absolute; inset: -3px;
     border-radius: 50%;
-    border: 3px solid var(--accent-2);
+    border: 3px solid var(--accent);
     opacity: 0;
   }
 
@@ -89,18 +95,18 @@
     border-radius: var(--card-radius);
     overflow: hidden;
     background:
-      linear-gradient(135deg, var(--glass-hi) 0%, rgba(255,255,255,0.02) 55%, rgba(255,255,255,0.06) 100%),
-      var(--glass);
+      linear-gradient(135deg, var(--glass-hi) 0%, rgba(255,255,255,0.02) 55%, rgba(255,255,255,0.05) 100%),
+      linear-gradient(170deg, var(--glass-from) 0%, var(--glass-to) 100%);
     box-shadow:
       inset 0 0 0 1.5px var(--glass-border),
       inset 0 1.5px 0 rgba(255,255,255,0.22),
-      0 22px 60px rgba(0, 0, 0, 0.38);
+      0 22px 60px rgba(10, 22, 30, 0.40);
   }
   .card .label {
     position: absolute;
     color: var(--text);
     font-weight: 600;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.005em;
     white-space: nowrap;
     will-change: filter, transform;
   }
@@ -224,7 +230,7 @@ const steps = CONFIG.steps.map((text, i) => {
 let G; // Geometrie
 function layout() {
   if (FMT.layout === "vertical") {
-    const D = 100, cardH = 124, cardW = 760, gapX = 26, pitch = 168, fs = 44, padX = 44;
+    const D = 100, cardH = 124, cardW = 780, gapX = 26, pitch = 168, fs = 44, padX = 52;
     const totalW = D + gapX + cardW;
     const totalH = cardH * 3 + (pitch - cardH) * 2;
     const left = Math.round((FMT.w - totalW) / 2);
@@ -244,7 +250,7 @@ function layout() {
     Object.assign(track.style, { left: G.track.x + "px", top: G.track.y0 + "px", width: lw + "px" });
     track.style.setProperty("--track-dir", "180deg");
   } else {
-    const D = 92, cardH = 136, cardW = 440, pitch = 500, gapY = 30, fs = 36, padX = 30;
+    const D = 92, cardH = 136, cardW = 440, pitch = 500, gapY = 30, fs = 36, padX = 40;
     const totalH = D + gapY + cardH;
     const x0 = Math.round(FMT.w / 2 - pitch);
     const top = Math.round(FMT.h * FMT.anchorY - totalH / 2);
@@ -386,7 +392,10 @@ function render(t) {
 window.__CONFIG = CONFIG;
 window.__FMT = FMT;
 window.__render = render;
-window.__ready = (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { layout(); render(0); return true; });
+// Rubik explizit laden, bevor gemessen wird (sonst stimmen Textbreiten & Auto-Fit nicht)
+window.__ready = Promise.all(["500", "600", "700"].map(w => document.fonts.load(`${w} 44px "Rubik"`)))
+  .then(() => document.fonts.ready)
+  .then(() => { layout(); render(0); return document.fonts.check('600 44px "Rubik"'); });
 
 if (!RENDER) {
   const scaleToFit = () => {

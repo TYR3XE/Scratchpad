@@ -39,7 +39,7 @@ for (const format of formats) {
     const page = await browser.newPage({ deviceScaleFactor: 1 });
     const url = pathToFileURL(path.join(here, "index.html")).href + `?render&format=${format}&variant=${variant}`;
     await page.goto(url);
-    await page.evaluate(() => window.__ready);
+    if (!(await page.evaluate(() => window.__ready))) throw new Error("Schrift Rubik wurde nicht geladen (fonts/ fehlt?)");
     const { w, h, duration } = await page.evaluate(() => ({ w: window.__FMT.w, h: window.__FMT.h, duration: window.__CONFIG.duration }));
     await page.setViewportSize({ width: w, height: h });
 
